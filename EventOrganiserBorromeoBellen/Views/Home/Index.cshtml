@@ -1,0 +1,30 @@
+﻿@model IEnumerable<EventOrganizer.Models.EventDetails>
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="jumbotron text-center bg-primary text-white py-5 mb-4">
+    <h1>Welcome to Event Organizer</h1>
+    <p>Manage your events and participants effortlessly</p>
+    <a asp-controller="EventDetails" asp-action="Create" class="btn btn-light btn-lg">Create Event</a>
+</div>
+
+<div class="container">
+    <h2>Upcoming Events</h2>
+    <div class="row">
+        @foreach (var ev in Model.Take(4))
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@ev.EventName</h5>
+                        <p class="card-text">@ev.Description?.Substring(0, Math.Min(50, ev.Description.Length))...</p>
+                        <p><strong>Date:</strong> @ev.EventDate.ToShortDateString()</p>
+                        <p><strong>Location:</strong> @ev.Location</p>
+                        <a asp-controller="Events" asp-action="Details" asp-route-id="@ev.EventId" class="btn btn-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
