@@ -53,20 +53,62 @@ namespace EventOrganiserBorromeoBellen.Controllers
         }
 
         // POST: Participants/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ParticipantId,FullName,Email,ContactNumber,EventId,JoinedDate")] Participant participant)
+        public async Task<IActionResult> Create(Participant participant)
         {
-            if (ModelState.IsValid)
+            // Ensure dropdown is available if we need to re-render the view
+            ViewData["EventId"] = new SelectList(_context.EventDetails, "EventId", "EventName", participant?.EventId);
+
+            // Basic server-side fixes / normalization
+            if (participant != null)
+            {
+                // Trim strings to avoid validation failures for whitespace
+                participant.FullName = participant.FullName?.Trim();
+                participant.Email = participant.Email?.Trim();
+                participant.ContactNumber = participant.ContactNumber?.Trim();
+
+                // If JoinedDate wasn't provided or model binder failed, set it to today
+                // Note: clear ModelState and revalidate after normalization to handle parse errors
+                if (participant.JoinedDate == default)
+                {
+                    participant.JoinedDate = DateTime.UtcNow.Date;
+                }
+                else
+                {
+                    participant.JoinedDate = participant.JoinedDate.Date;
+                }
+
+                // Clear previous modelstate (parsing errors) and revalidate the normalized model
+                ModelState.Clear();
+                TryValidateModel(participant);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // Build a concise list of validation errors for debugging
+                var errors = ModelState.Where(kvp => kvp.Value.Errors.Count > 0)
+                    .Select(kvp => new { Field = kvp.Key, Errors = kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray() })
+                    .ToList();
+
+                // Pass errors to the view in case the developer needs details (do not expose in production)
+                ViewData["ValidationErrors"] = errors;
+
+                return View(participant);
+            }
+
+            try
             {
                 _context.Add(participant);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EventId"] = new SelectList(_context.EventDetails, "EventId", "EventName", participant.EventId);
-            return View(participant);
+            catch (Exception ex)
+            {
+                // Capture the exception and show an error on the form so the user knows what happened
+                ModelState.AddModelError(string.Empty, "An error occurred while saving the participant: " + ex.Message);
+                return View(participant);
+            }
         }
 
         // GET: Participants/Edit/5
@@ -87,8 +129,6 @@ namespace EventOrganiserBorromeoBellen.Controllers
         }
 
         // POST: Participants/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ParticipantId,FullName,Email,ContactNumber,EventId,JoinedDate")] Participant participant)

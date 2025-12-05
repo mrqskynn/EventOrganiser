@@ -18,10 +18,11 @@ namespace EventOrganizer.Models
         public string ContactNumber { get; set; }
 
         // Foreign key to Event
-        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Select an event")] // require selecting a valid event id
         public int EventId { get; set; }
 
-        public EventDetails Event { get; set; }
+        // Make navigation property nullable to avoid implicit required validation
+        public EventDetails? Event { get; set; }
 
         // JoinedDate only (date part)
         [Required, DataType(DataType.Date)]

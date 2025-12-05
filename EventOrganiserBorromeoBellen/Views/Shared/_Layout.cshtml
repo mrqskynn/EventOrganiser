@@ -1,47 +1,78 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@using Microsoft.AspNetCore.Mvc.Routing
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@using Microsoft.AspNetCore.Routing
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - EventOrganiserBorromeoBellen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Bootswatch Sandstone -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/sandstone/bootstrap.min.css" />
+    <title>@ViewData["Title"] - Event Organizer</title>
+
+    <!-- Bootswatch Sandstone Theme -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/sandstone/bootstrap.min.css" />
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/EventOrganiserBorromeoBellen.styles.css" asp-append-version="true" />
 </head>
-<body>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- NAVBAR -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">EventOrganizer</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                    EventOrganizer
+                </a>
+
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false"
+                        aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarNav">
+
                     <ul class="navbar-nav ms-auto">
+
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="EventDetails" asp-action="Index">Events</a>
+                            <a class="nav-link @IsActive("EventDetails")"
+                               asp-controller="EventDetails" asp-action="Index">
+                                Events
+                            </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Participants" asp-action="Index">Participants</a>
+                            <a class="nav-link @IsActive("Participants")"
+                               asp-controller="Participants" asp-action="Index">
+                                Participants
+                            </a>
                         </li>
+
                     </ul>
                 </div>
+
             </div>
         </nav>
     </header>
 
-    <main role="main" class="container pb-4">
+    <!-- MAIN CONTENT -->
+    <main class="container my-4 flex-grow-1">
         @RenderBody()
     </main>
 
+    <!-- FOOTER -->
     <footer class="bg-light text-center text-muted py-3 border-top mt-auto">
-        <div class="container">
-            &copy; 2025 - Event Organizer | Borromeo | Bellen -
-            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <div class="container small">
+            &copy; 2025 - Event Organizer | Borromeo | Bellen —
+            <a class="text-decoration-none" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 
@@ -49,6 +80,17 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>
+
+@functions {
+    // Active-link helper for navbar highlighting
+    string IsActive(string controllerName)
+    {
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        return currentController == controllerName ? "active fw-bold" : "";
+    }
+}
